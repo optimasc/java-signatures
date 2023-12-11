@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>com.optimasc.signatures</groupId>
+	<artifactId>cdc11fp</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    
+	<description>CDC Foundation profile 1.1.2 API Signatures</description>
+	<name>CDC 1.1 FP API signatures</name>
+	<inceptionYear>2023</inceptionYear>
+
+	<licenses>
+		<license>
+			<name>Creative Commons Zero v1.0 Universal</name>
+		</license>
+	</licenses>
+
+	<!-- The location where the data will be distributed -->
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>3.0.0</version>
+			</plugin>
+			<!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.0.2</version>
+			</plugin>
+			
+	       <plugin>
+	        <groupId>org.codehaus.mojo</groupId>
+	        <artifactId>animal-sniffer-maven-plugin</artifactId>
+	        <version>1.8</version>
+	        <executions>
+	          <execution>
+								<id>generate-signature</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>build</goal>
+								</goals>
+		        <configuration>
+		          <javaHomeClassPath>
+		            <javaHomeClassPath>C:\PortableApps\Java\libs\cdc_1.1.jar</javaHomeClassPath>
+		            <javaHomeClassPath>C:\PortableApps\Java\libs\fp_1.1.jar</javaHomeClassPath>
+		          </javaHomeClassPath>
+		         <includeClasses>
+		            <includeClass>java.*</includeClass>
+		            <includeClass>javax.*</includeClass>
+		            <includeClass>org.omg.*</includeClass>
+		            <includeClass>org.w3c.dom.*</includeClass>
+		          </includeClasses>          
+                 </configuration>		          
+	        </execution>
+	        </executions>
+            </plugin>			
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+								<configuration>
+									<keyname>${gpg.keyname}</keyname>
+									<passphraseServerId>${gpg.keyname}</passphraseServerId>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>            
+			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+				<configuration>
+                  <file>${basedir}/target/${project.artifactId}-${project.version}.signature</file>
+                </configuration>            
+			</plugin>
+			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.8.2</version>
+			</plugin>
+		</plugins>
+
+	</build>
+
+</project>
