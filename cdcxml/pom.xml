@@ -4,171 +4,50 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.optimasc.signatures</groupId>
+	<parent>
+		<groupId>com.optimasc.signatures</groupId>
+		<artifactId>java-signatures-parent</artifactId>
+		<version>1.1.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
 	<artifactId>cdc11fpxml</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-	
-	<description>CDC Foundation profile 1.1.2 API Signatures with base JSR 172 and JSR 280</description>
+	<packaging>pom</packaging>
+
 	<name>CDC 1.1 FP with JSR 172/JSR 280 API signatures</name>
-	<inceptionYear>2023</inceptionYear>
-
-	<licenses>
-		<license>
-			<name>Creative Commons Zero v1.0 Universal</name>
-			<url>https://creativecommons.org/publicdomain/zero/1.0/legalcode</url>
-		</license>
-	</licenses>
-
-	<scm>
-		<connection>scm:git:git://github.com/optimasc/java-signatures.git</connection>
-		<developerConnection>scm:git:ssh://github.com:optimasc/java-signatures.git</developerConnection>
-		<url>https://github.com/optimasc/java-signatures/tree/main</url>
-	</scm>
-	
-
-	<!-- The location where the data will be distributed -->
-	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
-		</snapshotRepository>
-		<repository>
-			<id>ossrh</id>
-			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-	</distributionManagement>
-
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!--  Key ID used for artifact signing -->
-		<gpg.keyname>627E3C7E</gpg.keyname>
-	</properties>
-
- <developers>
-    <developer>
-      <name>Carl Eric Codere</name>
-      <organization>Optima SC Inc</organization>
-      <organizationUrl>http://www.optimasc.com</organizationUrl>
-    </developer>
-  </developers>	
+	<description>CDC Foundation profile 1.1.2 API Signatures with base JSR 172 and JSR 280</description>
 
 	<build>
 		<plugins>
-			<!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
 			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.0.0</version>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate-signature</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+						<configuration>
+							<javaHomeClassPath>
+								<javaHomeClassPath>C:\PortableApps\Java\libs\cdc_1.1.jar</javaHomeClassPath>
+								<javaHomeClassPath>C:\PortableApps\Java\libs\jsr280_1.0.jar</javaHomeClassPath>
+								<javaHomeClassPath>C:\PortableApps\Java\libs\jsr172_1.0-base.jar</javaHomeClassPath>
+								<javaHomeClassPath>C:\PortableApps\Java\libs\fp_1.1.jar</javaHomeClassPath>
+							</javaHomeClassPath>
+							<includeClasses>
+								<includeClass>java.*</includeClass>
+								<includeClass>javax.*</includeClass>
+								<includeClass>org.omg.*</includeClass>
+								<includeClass>org.w3c.dom.*</includeClass>
+								<includeClass>org.xml.*</includeClass>
+							</includeClasses>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
-			<!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.0.2</version>
-			</plugin>
-			
-	       <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-source-plugin</artifactId>
-      <version>2.2.1</version>
-      <executions>
-        <execution>
-          <id>attach-sources</id>
-          <goals>
-            <goal>jar-no-fork</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-javadoc-plugin</artifactId>
-      <version>2.9.1</version>
-      <executions>
-        <execution>
-          <id>attach-javadocs</id>
-          <goals>
-            <goal>jar</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>			
-    
- <plugin>
-      <groupId>org.sonatype.plugins</groupId>
-      <artifactId>nexus-staging-maven-plugin</artifactId>
-      <version>1.6.7</version>
-      <extensions>true</extensions>
-      <configuration>
-        <serverId>ossrh</serverId>
-        <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-        <autoReleaseAfterClose>true</autoReleaseAfterClose>
-      </configuration>
-    </plugin>    
-			
-	       <plugin>
-	        <groupId>org.codehaus.mojo</groupId>
-	        <artifactId>animal-sniffer-maven-plugin</artifactId>
-	        <version>1.8</version>
-	        <executions>
-	          <execution>
-								<id>generate-signature</id>
-								<phase>compile</phase>
-								<goals>
-									<goal>build</goal>
-								</goals>
-        <configuration>
-          <javaHomeClassPath>
-            <javaHomeClassPath>C:\PortableApps\Java\libs\cdc_1.1.jar</javaHomeClassPath>
-            <javaHomeClassPath>C:\PortableApps\Java\libs\jsr280_1.0.jar</javaHomeClassPath>
-            <javaHomeClassPath>C:\PortableApps\Java\libs\jsr172_1.0-base.jar</javaHomeClassPath>
-            <javaHomeClassPath>C:\PortableApps\Java\libs\fp_1.1.jar</javaHomeClassPath>
-          </javaHomeClassPath>
-         <includeClasses>
-            <includeClass>java.*</includeClass>
-            <includeClass>javax.*</includeClass>
-            <includeClass>org.omg.*</includeClass>
-            <includeClass>org.w3c.dom.*</includeClass>
-            <includeClass>org.xml.*</includeClass>
-          </includeClasses>          
-        </configuration>	        
-	        </execution>
-	        </executions>
-            </plugin>			
-			<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.5</version>
-						<executions>
-							<execution>
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
-								<goals>
-									<goal>sign</goal>
-								</goals>
-								<configuration>
-									<keyname>${gpg.keyname}</keyname>
-									<passphraseServerId>${gpg.keyname}</passphraseServerId>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>            
-			<plugin>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.5.2</version>
-				<configuration>
-                  <file>${basedir}/target/${project.artifactId}-${project.version}.signature</file>
-                </configuration>            
-			</plugin>
-<!--			
-			<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.2</version>
-			</plugin> -->
-
-
 		</plugins>
-
 	</build>
 
 </project>
