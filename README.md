@@ -18,8 +18,9 @@ How to use with Animal Sniffer Maven plugin for example against cdc11fp:
   <configuration>
     <signature>
          <groupId>com.optimasc.signatures</groupId>
+         <!-- FIXME: Update according to target check -->
          <artifactId>cdc11fp</artifactId>
-         <version>1.0.0-SNAPSHOT</version>
+         <version>1.1.0</version>
     </signature>
   </configuration>
 <executions>
