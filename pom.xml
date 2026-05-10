@@ -11,6 +11,7 @@
 	<name>Java API Signatures (parent)</name>
 	<description>Animal Sniffer Java API signatures for different java profiles</description>
 	<inceptionYear>2023</inceptionYear>
+	<url>https://github.com/optimasc/java-signatures</url> 
 
 	<modules>
 		<module>cdcfp</module>
