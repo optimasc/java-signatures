@@ -8,6 +8,7 @@ This contains Animal Sniffer Java API signatures for different java profiles:
 
 How to use with Animal Sniffer Maven plugin for example against cdc11fp:
 
+```
 <!-- Permits to check against against certain API compatibility levels -->
 
 <plugin>
@@ -31,6 +32,7 @@ How to use with Animal Sniffer Maven plugin for example against cdc11fp:
   </execution>
 </executions>
 </plugin>
+```
 
 
 This is provided in Public Domain.
