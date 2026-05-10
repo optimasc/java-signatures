@@ -35,5 +35,3 @@ How to use with Animal Sniffer Maven plugin for example against cdc11fp:
 </plugin>
 ```
 
-
-This is provided in Public Domain.
