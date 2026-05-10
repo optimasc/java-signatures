@@ -78,6 +78,27 @@ To use a different key, override `gpg.keyname` on the command line:
 mvn verify -Dgpg.keyname=YOURKEYID
 ```
 
+### 4. Sonatype Central account
+
+Required only for publishing to Maven Central. Not needed for local builds, installs,
+or Git tagging.
+
+1. Create an account at <https://central.sonatype.com>.
+2. Verify ownership of the `com.optimasc` namespace (one-time).
+3. Generate a user token under **Account ? Generate User Token**. Save the
+   resulting `username` and `password` values — they go into `settings.xml` below.
+
+### 5. Git access to GitHub
+
+The `developerConnection` URL in the parent POM uses SSH. Make sure your SSH key
+is configured for GitHub:
+
+```bash
+ssh -T git@github.com
+```
+
+You should see a "Hi <username>! You've successfully authenticated" message.
+
 ---
 
 ## `~/.m2/settings.xml`
@@ -136,101 +157,114 @@ chmod 600 ~/.m2/settings.xml
 
 ---
 
-## Build, install, deploy
+Building Procedure
+------------------
 
-All commands are run from the project root unless noted otherwise.
+The following steps shall be executed to prepare and deploy a release. Complete the
+Build Procedure above before proceeding.
 
-### Build only (compile and generate signatures)
+1. Execute `mvn clean`.
+2. Execute `mvn package` to build locally.
+3. Execute `mvn install` to install the signatures into the local repository and
+  `~/.m2/repository/com/optimasc/signatures/` and can be consumed as `<signature>`
+   dependencies of the `animal-sniffer-maven-plugin` in other projects.
 
-```bash
-mvn clean package
-```
+Release Procedure
+------------------
 
-Each module produces `target/<artifactId>-<version>.signature` plus signed `.asc`
-companion files. Nothing is installed or published.
+### Tagging a release in Git
 
-### Install into the local repository
+Tagging is handled by `maven-release-plugin`. The flow strips `-SNAPSHOT`, commits
+the POMs, creates a Git tag, pushes the tag, and bumps to the next development
+`-SNAPSHOT`. **No artifacts are published to Maven Central in this step** — it's
+purely a Git operation.
 
-```bash
-mvn clean install
-```
+### Pre-flight checklist
 
-After this, the three signature artifacts are available in `~/.m2/repository/com/optimasc/signatures/`
-and can be consumed as `<signature>` dependencies of the `animal-sniffer-maven-plugin`
-in other projects.
-
-### Deploy to Maven Central
-
-```bash
-mvn clean deploy
-```
-
-This runs the full lifecycle through the `deploy` phase, which invokes
-`central-publishing-maven-plugin`. The plugin uploads the signed artifacts to
-Sonatype Central and (because `<autoPublish>` is at its default) waits for validation.
-
-You can monitor and manually release the deployment from the Central portal at
-<https://central.sonatype.com/publishing/deployments>.
-
-### Build a single module
-
-```bash
-mvn -pl cdcfp clean install
-```
-
-Use `-pl <module>` (project list) to operate on one module at a time. Add `-am`
-(also-make) if you ever introduce inter-module dependencies.
-
----
-
-## Releasing (tagging in Git)
-
-Releases are managed by `maven-release-plugin`. The flow strips `-SNAPSHOT`, commits
-the POMs, creates a Git tag, pushes the tag, and bumps to the next development version.
-
-### Prerequisites for a release
+Before invoking the release:
 
 - Working tree is clean (`git status` shows no changes).
 - You are on the branch you intend to release from (typically `main`).
-- Your SSH key is configured for GitHub (the `developerConnection` URL uses SSH).
-- All previous release artifacts (`release.properties`, `pom.xml.releaseBackup`) are absent.
-  Run `mvn release:clean` if a previous attempt left them behind.
+- All previous release artifacts (`release.properties`, `pom.xml.releaseBackup`)
+  are absent. Run `mvn release:clean` if a previous attempt left them behind.
+- GPG key is available and `settings.xml` has the `627E3C7E` server entry
+  (the release process runs `verify`, which signs).
+- Access to GitHub is working.
 
-### Prepare the release
+### Run the tag
 
 ```bash
 mvn release:prepare
 ```
 
-You will be prompted three times:
+You will be prompted three times (defaults are usually correct):
 
 1. **Release version** — strips `-SNAPSHOT` (e.g. `1.1.0-SNAPSHOT` ? `1.1.0`).
 2. **Tag name** — defaults to `v1.1.0` based on the `tagNameFormat` configured
    in the parent POM.
-3. **Next development version** — defaults to the next patch SNAPSHOT (e.g. `1.1.1-SNAPSHOT`).
+3. **Next development version** — defaults to the next patch SNAPSHOT
+   (e.g. `1.1.1-SNAPSHOT`).
 
-The plugin then commits the version changes, creates the tag locally, and pushes
-both the commits and the tag to `origin`.
+After the prompts the plugin commits the version changes, creates the tag locally,
+and pushes both the commits and the tag to `origin`. **Stop here — do not run
+`release:perform` unless you want to publish to Maven Central** (see the next
+section).
 
-### Perform the release (optional — only if publishing to Central)
+The plugin leaves a `release.properties` file and a few `pom.xml.releaseBackup`
+files in your tree. These are needed if you later want to run `release:perform`
+against this tag. If you don't intend to publish, you can clean them up with
+`mvn release:clean`.
+
+### Recovering from a failed `release:prepare`
+
+* Failed before commit/tag was created : `mvn release:rollback`
+* Tag was created locally but not pushed : `git tag -d v1.1.0`, then `mvn release:rollback`
+* Tag was already pushed when failure occurred : `git push --delete origin v1.1.0`, then `mvn release:rollback`
+* Leftover `release.properties` / backup POMs : `mvn release:clean` |
+
+
+## Publishing to Maven Central (separately, on demand)
+
+Publishing is a deliberate, separate step from tagging. Run it whenever you decide
+the tagged version should be made public on Maven Central — this can be immediately
+after `release:prepare`, days later, or never.
+
+There are two ways to publish, depending on your situation.
+
+### Option A — Publish a freshly tagged release
+
+If `release.properties` is still present from a recent `release:prepare`, the
+release plugin can check out the tag for you and run `mvn deploy` against it
+automatically:
 
 ```bash
 mvn release:perform
 ```
 
-This checks out the freshly created tag and runs `mvn deploy` against it. Requires
-the Sonatype Central credentials in `settings.xml` to be valid.
+This is the cleanest option when publishing right after tagging. It checks out the
+tag in a temporary working copy, runs `mvn deploy` against it, and the
+`central-publishing-maven-plugin` uploads the signed artifacts to Sonatype Central.
 
-If you only wanted to tag in Git and don't want to publish to Central, skip this step.
+### Option B — Publish an older tag (or any specific commit)
 
-### Recovering from a failed release
+If `release.properties` is gone (you ran `release:clean`, switched machines,
+released long ago, etc.), check out the tag manually and run `deploy`:
 
-| Situation | Command |
-|---|---|
-| Failed before commit/tag was created | `mvn release:rollback` |
-| Tag was created locally but not pushed | `git tag -d v1.1.0` then `mvn release:rollback` |
-| Tag was already pushed | `git push --delete origin v1.1.0`, then `mvn release:rollback` |
-| Leftover `release.properties` / backup POMs | `mvn release:clean` |
+```bash
+git checkout v1.1.0
+mvn clean deploy
+git checkout main
+```
+
+The signed artifacts are uploaded to Sonatype Central by the
+`central-publishing-maven-plugin`.
+
+### After the upload
+
+The Sonatype Central deployment may need a manual release click in the portal,
+depending on plugin defaults. Check the deployment status at
+<https://central.sonatype.com/publishing/deployments> and release it manually if
+it's in a `VALIDATED` state awaiting confirmation.
 
 ---
 

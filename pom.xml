@@ -28,7 +28,7 @@
 
 	<scm>
         <connection>scm:git:https://github.com/optimasc/java-signatures.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/optimasc/java-signatures.git</developerConnection>	
+        <developerConnection>scm:git:https://github.com/optimasc/java-signatures.git</developerConnection>	
 		<url>http://github.com/optimasc/java-signatures/tree/main</url>
 	</scm>
 
@@ -186,6 +186,7 @@
         <extensions>true</extensions>
         <configuration>
           <publishingServerId>central</publishingServerId>
+          <autoPublish>false</autoPublish>
         </configuration>
       </plugin>
 
