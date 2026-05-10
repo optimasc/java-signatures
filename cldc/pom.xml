@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.optimasc.signatures</groupId>
 		<artifactId>java-signatures-parent</artifactId>
-		<version>1.2.0-SNAPSHOT</version>
+		<version>1.1.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -14,7 +14,7 @@
 	<packaging>pom</packaging>
 
 	<name>CLDC 1.1</name>
-	<description>CLDC Foundation profile (JSR 139) API Signatures</description>
+	<description>Animal Sniffer CLDC Foundation profile (JSR 139) API Signatures</description>
 
 	<build>
 		<plugins>
